@@ -40,6 +40,7 @@
 		021D06DC1A9282BF0049AC53 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		021D06DD1A9282BF0049AC53 /* MyLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyLogTests.swift; sourceTree = "<group>"; };
 		021D06E71A9286320049AC53 /* LogItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogItem.swift; sourceTree = "<group>"; };
+		021D06E91A92A8310049AC53 /* MyLogV2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MyLogV2.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -430,9 +431,10 @@
 		021D06C61A9282BF0049AC53 /* MyLog.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				021D06E91A92A8310049AC53 /* MyLogV2.xcdatamodel */,
 				021D06C71A9282BF0049AC53 /* MyLog.xcdatamodel */,
 			);
-			currentVersion = 021D06C71A9282BF0049AC53 /* MyLog.xcdatamodel */;
+			currentVersion = 021D06E91A92A8310049AC53 /* MyLogV2.xcdatamodel */;
 			path = MyLog.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

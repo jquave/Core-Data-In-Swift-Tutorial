@@ -39,7 +39,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             for (itemTitle, itemText) in items {
                 // Create an individual item
                 LogItem.createInManagedObjectContext(moc,
-                    title: itemTitle, text: itemText)
+                    title: itemTitle, fullTitle: "\(itemTitle) \(itemText)", text: itemText)
             }
             
             
@@ -113,7 +113,9 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     func saveNewItem(title : String) {
         // Create the new  log item
-        var newLogItem = LogItem.createInManagedObjectContext(self.managedObjectContext!, title: title, text: "")
+        var newLogItem = LogItem.createInManagedObjectContext(self.managedObjectContext!, title: title,
+            fullTitle: "My Full Title",
+            text: "")
         
         // Update the array containing the table view row data
         self.fetchLog()
