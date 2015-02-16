@@ -30,9 +30,9 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             // Create some dummy data to work with
             var items = [
                 ("Best Animal", "Dog"),
-                ("Best Language","Swift"),
-                ("Worst Animal","Cthulu"),
-                ("Worst Language","LOLCODE")
+                ("Best Language", "Swift"),
+                ("Worst Animal", "Cthulu"),
+                ("Worst Language", "LOLCODE")
             ]
             
             // Loop through, creating items
@@ -54,8 +54,15 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             // Adjust it down by 20 points
             viewFrame.origin.y += 20
             
-            // Reduce the total height by 20 points
-            viewFrame.size.height -= 20
+            // Add in the "+" button at the bottom
+            let addButton = UIButton(frame: CGRectMake(0, UIScreen.mainScreen().bounds.size.height - 44, UIScreen.mainScreen().bounds.size.width, 44))
+            addButton.setTitle("+", forState: .Normal)
+            addButton.backgroundColor = UIColor(red: 0.5, green: 0.9, blue: 0.5, alpha: 1.0)
+            addButton.addTarget(self, action: "addNewItem", forControlEvents: .TouchUpInside)
+            self.view.addSubview(addButton)
+            
+            // Reduce the total height by 20 points for the status bar, and 44 points for the bottom button
+            viewFrame.size.height -= (20 + addButton.frame.size.height)
             
             // Set the logTableview's frame to equal our temporary variable with the full size of the view
             // adjusted to account for the status bar height
@@ -76,6 +83,60 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         fetchLog()
     }
     
+    let addItemAlertViewTag = 0
+    let addItemTextAlertViewTag = 1
+    func addNewItem() {
+        
+        var titlePrompt = UIAlertController(title: "Enter Title",
+            message: "Enter Text",
+            preferredStyle: .Alert)
+        
+        var titleTextField: UITextField?
+        titlePrompt.addTextFieldWithConfigurationHandler {
+            (textField) -> Void in
+            titleTextField = textField
+            textField.placeholder = "Title"
+        }
+        
+        titlePrompt.addAction(UIAlertAction(title: "Ok",
+            style: .Default,
+            handler: { (action) -> Void in
+                if let textField = titleTextField {
+                    self.saveNewItem(textField.text)
+                }
+        }))
+        
+        self.presentViewController(titlePrompt,
+            animated: true,
+            completion: nil)
+    }
+    
+    func saveNewItem(title : String) {
+        // Create the new  log item
+        var newLogItem = LogItem.createInManagedObjectContext(self.managedObjectContext!, title: title, text: "")
+        
+        // Update the array containing the table view row data
+        self.fetchLog()
+        
+        // Animate in the new row
+        // Use Swift's find() function to figure out the index of the newLogItem
+        // after it's been added and sorted in our logItems array
+        if let newItemIndex = find(logItems, newLogItem) {
+            // Create an NSIndexPath from the newItemIndex
+            let newLogItemIndexPath = NSIndexPath(forRow: newItemIndex, inSection: 0)
+            // Animate in the insertion of this row
+            logTableView.insertRowsAtIndexPaths([ newLogItemIndexPath ], withRowAnimation: .Automatic)
+            save()
+        }
+    }
+    
+    func save() {
+        var error : NSError?
+        if(managedObjectContext!.save(&error) ) {
+            println(error?.localizedDescription)
+        }
+    }
+    
     func fetchLog() {
         let fetchRequest = NSFetchRequest(entityName: "LogItem")
         
@@ -86,19 +147,6 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         // Set the list of sort descriptors in the fetch request,
         // so it includes the sort descriptor
         fetchRequest.sortDescriptors = [sortDescriptor]
-        
-        // Create a new predicate that filters out any object that
-        // doesn't have a title of "Best Language" exactly.
-        let firstPredicate = NSPredicate(format: "title == %@", "Best Language")
-
-        // Search for only items using the substring "Worst"
-        let thPredicate = NSPredicate(format: "title contains %@", "Worst")
-        
-        // Combine the two predicates above in to one compound predicate
-        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.OrPredicateType, subpredicates: [firstPredicate, thPredicate])
-        
-        // Set the predicate on the fetch request
-        fetchRequest.predicate = predicate
         
         if let fetchResults = managedObjectContext!.executeFetchRequest(fetchRequest, error: nil) as? [LogItem] {
             logItems = fetchResults
@@ -128,6 +176,28 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         let logItem = logItems[indexPath.row]
         println(logItem.itemText)
+    }
+    
+    func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        return true
+    }
+    
+    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        if(editingStyle == .Delete ) {
+            // Find the LogItem object the user is trying to delete
+            let logItemToDelete = logItems[indexPath.row]
+            
+            // Delete it from the managedObjectContext
+            managedObjectContext?.deleteObject(logItemToDelete)
+            
+            // Refresh the table view to indicate that it's deleted
+            self.fetchLog()
+            
+            // Tell the table view to animate out that row
+            logTableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+            
+            save()
+        }
     }
 
     override func didReceiveMemoryWarning() {
