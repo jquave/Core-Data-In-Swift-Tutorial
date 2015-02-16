@@ -78,6 +78,28 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     func fetchLog() {
         let fetchRequest = NSFetchRequest(entityName: "LogItem")
+        
+        // Create a sort descriptor object that sorts on the "title"
+        // property of the Core Data object
+        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
+        
+        // Set the list of sort descriptors in the fetch request,
+        // so it includes the sort descriptor
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        
+        // Create a new predicate that filters out any object that
+        // doesn't have a title of "Best Language" exactly.
+        let firstPredicate = NSPredicate(format: "title == %@", "Best Language")
+
+        // Search for only items using the substring "Worst"
+        let thPredicate = NSPredicate(format: "title contains %@", "Worst")
+        
+        // Combine the two predicates above in to one compound predicate
+        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.OrPredicateType, subpredicates: [firstPredicate, thPredicate])
+        
+        // Set the predicate on the fetch request
+        fetchRequest.predicate = predicate
+        
         if let fetchResults = managedObjectContext!.executeFetchRequest(fetchRequest, error: nil) as? [LogItem] {
             logItems = fetchResults
         }
