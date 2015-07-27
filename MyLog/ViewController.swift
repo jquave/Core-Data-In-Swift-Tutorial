@@ -193,6 +193,9 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             // Refresh the table view to indicate that it's deleted
             self.fetchLog()
             
+            // Remove the item from the logItems array
+            logItems.removeAtIndex(indexPath.row);
+            
             // Tell the table view to animate out that row
             logTableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
             
